@@ -80,14 +80,14 @@ static void stabilize() {
     changed = 0;
     for (int i = 0; i < N; ++i) {
       for (int j = low[i]; j <= high[i]; ++j) {
-        if (grid[i][j] < 4)
-          continue;
-        changed = 1; // topple it
-        grid[i][j] -= 4;
-        grid[i - 1][j]++;
-        grid[i][j - 1]++;
-        grid[i + 1][j]++;
-        grid[i][j + 1]++;
+        int gv = grid[i][j];
+        int v = gv / 4;
+        grid[i][j] = gv % 4;
+        changed += v; // topple it
+        grid[i - 1][j] += v;
+        grid[i][j - 1] += v;
+        grid[i + 1][j] += v;
+        grid[i][j + 1] += v;
       }
     }
   } while (changed);

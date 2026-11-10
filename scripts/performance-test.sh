@@ -16,7 +16,7 @@ do
 echo "Round $i"
 
 echo "Running on Default:"
-tim=$({ /usr/bin/time -f "%e" ./main.exe 1000 > /dev/null; } 2>&1
+time=$({ /usr/bin/time -f "%e" ./main.exe 1000 > /dev/null; } 2>&1
 echo $time
 default_values+=($time)
 

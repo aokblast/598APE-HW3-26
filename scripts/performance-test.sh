@@ -16,7 +16,7 @@ do
 echo "Round $i"
 
 echo "Running on Default:"
-time=$(/usr/bin/time -f "%e" ./main.exe 1000 2>&1 >/dev/null)
+time=$(/usr/bin/time -f "%e" ./sandpile.exe 1000 2>&1 >/dev/null)
 echo $time
 default_values+=($time)
 

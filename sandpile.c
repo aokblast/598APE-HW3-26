@@ -83,7 +83,7 @@ static void stabilize() {
         int gv = grid[i][j];
         int v = gv / 4;
         grid[i][j] = gv % 4;
-        changed += v; // topple it
+        changed |= v; // topple it
         grid[i - 1][j] += v;
         grid[i][j - 1] += v;
         grid[i + 1][j] += v;
@@ -109,6 +109,59 @@ static void init_bounds() {
   }
 }
 
+// d = b - Ax
+static void cg(const double *b) {
+  int NP = N + 2;
+  size_t M = NP * NP;
+  double *x = calloc(M, sizeof(double));
+  double *r = calloc(M, sizeof(double));
+  double *d = calloc(M, sizeof(double));
+  double *adk = calloc(M, sizeof(double));
+#define FOR_EACH(k)                                                            \
+  for (int i = 0; i < N; ++i)                                                  \
+    for (size_t k = (size_t)(i + 1) * NP + low[i] + 1;                         \
+         k <= (size_t)(i + 1) * NP + high[i] + 1; ++k)
+  double rr = 0;
+  // init: d0 = b
+  FOR_EACH(k) {
+    r[k] = d[k] = b[k];
+    rr += b[k] * b[k];
+  }
+  double tol = 1e-22 * rr;
+  while (rr > tol) {
+    double dadk = 0;
+    FOR_EACH(k) {
+      adk[k] = 4 * d[k] - d[k - 1] - d[k + 1] - d[k - NP] - d[k + NP];
+      dadk += d[k] * adk[k];
+    }
+    double alpha = rr / dadk, rn = 0;
+    FOR_EACH(k) {
+      x[k] += alpha * d[k];
+      r[k] -= alpha * adk[k];
+      rn += r[k] * r[k];
+    }
+    double beta = rn / rr;
+    rr = rn;
+    FOR_EACH(k) d[k] = r[k] + beta * d[k];
+  }
+#undef FOR_EACH
+  for (int i = 0; i < N; ++i)
+    for (int j = low[i]; j <= high[i]; ++j) {
+      int t = (int)floor(x[(size_t)(i + 1) * NP + j + 1]) - 1;
+      if (t <= 0)
+        continue;
+      grid[i][j] -= 4 * t;
+      grid[i - 1][j] += t;
+      grid[i][j - 1] += t;
+      grid[i + 1][j] += t;
+      grid[i][j + 1] += t;
+    }
+  free(x);
+  free(r);
+  free(d);
+  free(adk);
+}
+
 static void find_identity() {
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
@@ -116,12 +169,23 @@ static void find_identity() {
     }
   }
   init_bounds();
+  size_t M = (size_t)(N + 2) * (N + 2);
+  double *b = calloc(M, sizeof(double));
+  for (int i = 0; i < N; ++i)
+    for (int j = low[i]; j <= high[i]; ++j)
+      b[(size_t)(i + 1) * (N + 2) + j + 1] = 3;
+  cg(b);
   stabilize();
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
       grid[i][j] = 6 - grid[i][j];
     }
   }
+  for (int i = 0; i < N; ++i)
+    for (int j = low[i]; j <= high[i]; ++j)
+      b[(size_t)(i + 1) * (N + 2) + j + 1] = grid[i][j] - 3;
+  cg(b);
+  free(b);
   stabilize();
 }
 
@@ -148,5 +212,7 @@ int main(int argc, char **argv) {
   render("identity.png");
   free(mat);
   free(grid - 1);
+  free(low);
+  free(high);
   return EXIT_SUCCESS;
 }

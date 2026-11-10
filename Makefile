@@ -1,4 +1,4 @@
-FUNC ?= gcc
+FUNC ?= clang
 copt := -c
 OBJ_DIR := ./bin/
 FLAGS := -O3 -lm -g -Werror

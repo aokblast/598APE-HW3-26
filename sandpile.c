@@ -84,14 +84,10 @@ static void stabilize() {
           continue;
         changed = 1; // topple it
         grid[i][j] -= 4;
-        if (i > 0)
-          grid[i - 1][j]++;
-        if (j > 0)
-          grid[i][j - 1]++;
-        if (i < N - 1)
-          grid[i + 1][j]++;
-        if (j < N - 1)
-          grid[i][j + 1]++;
+        grid[i - 1][j]++;
+        grid[i][j - 1]++;
+        grid[i + 1][j]++;
+        grid[i][j + 1]++;
       }
     }
   } while (changed);
@@ -141,17 +137,16 @@ int main(int argc, char **argv) {
     die("grid size must be a positive int");
   N = (int)parsed;
 
-  grid = (int **)malloc(N * sizeof(int *));
-  for (int i = 0; i < N; ++i) {
-    grid[i] = (int *)malloc(N * sizeof(int));
-  }
-
+  int NP = N + 2;
+  int *mat = calloc(NP * NP, sizeof(int));
+  grid = malloc(NP * sizeof(int *));
+  for (int i = 0; i < NP; ++i)
+    grid[i] = &mat[NP * i + 1];
+  ++grid;
   find_identity();
 
   render("identity.png");
-  for (int i = 0; i < N; ++i) {
-    free(grid[i]);
-  }
-  free(grid);
+  free(mat);
+  free(grid - 1);
   return EXIT_SUCCESS;
 }

@@ -20,6 +20,8 @@ static void die(const char *s) {
 
 int N = 801;
 int **grid;
+static int *low;
+static int *high;
 
 // you can also use this function to debug print your sandpile
 static void render(char *filename) {
@@ -77,33 +79,47 @@ static void stabilize() {
   do {
     changed = 0;
     for (int i = 0; i < N; ++i) {
-      for (int j = 0; j <= MAX(i, N - 1 - i); ++j) {
-        if ((i - N / 2) * (i - N / 2) + (j - N / 2) * (j - N / 2) <=
-            (N / 2) * (N / 2)) {
-          if (grid[i][j] < 4)
-            continue;
-          changed = 1; // topple it
-          grid[i][j] -= 4;
-          if (i > 0)
-            grid[i - 1][j]++;
-          if (j > 0)
-            grid[i][j - 1]++;
-          if (i < N - 1)
-            grid[i + 1][j]++;
-          if (j < N - 1)
-            grid[i][j + 1]++;
-        }
+      for (int j = low[i]; j <= high[i]; ++j) {
+        if (grid[i][j] < 4)
+          continue;
+        changed = 1; // topple it
+        grid[i][j] -= 4;
+        if (i > 0)
+          grid[i - 1][j]++;
+        if (j > 0)
+          grid[i][j - 1]++;
+        if (i < N - 1)
+          grid[i + 1][j]++;
+        if (j < N - 1)
+          grid[i][j + 1]++;
       }
     }
   } while (changed);
 }
 
-void find_identity() {
+static void init_bounds() {
+  low = malloc(N * sizeof(int));
+  high = malloc(N * sizeof(int));
+  for (int i = 0; i < N; ++i) {
+    low[i] = N;
+    high[i] = -1;
+    for (int j = 0; j <= MAX(i, N - 1 - i); ++j) {
+      if ((i - N / 2) * (i - N / 2) + (j - N / 2) * (j - N / 2) <=
+          (N / 2) * (N / 2)) {
+        low[i] = MIN(low[i], j);
+        high[i] = j;
+      }
+    }
+  }
+}
+
+static void find_identity() {
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
       grid[i][j] = 6;
     }
   }
+  init_bounds();
   stabilize();
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {

@@ -1,4 +1,4 @@
-FUNC := gcc
+FUNC ?= gcc
 copt := -c
 OBJ_DIR := ./bin/
 FLAGS := -O3 -lm -g -Werror

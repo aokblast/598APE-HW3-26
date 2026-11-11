@@ -81,10 +81,11 @@ static void stabilize() {
     changed = 0;
     for (int i = 0; i < N; ++i) {
       int l = low[i], r = high[i];
+      int *restrict rvp = &rv[(i + 1) * (N + 2)];
       for (int j = l; j <= r; ++j) {
         int gv = grid[i][j];
         int v = gv / 4;
-        rv[(i + 1) * (N + 2) + j + 1] = v;
+        rvp[j + 1] = v;
         changed |= v; // topple it
       }
     }

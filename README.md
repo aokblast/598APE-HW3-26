@@ -48,6 +48,16 @@ To test the speedup of a specific optimization, we first test the commit where t
 
 The commit hash can be found using `git log`.
 
+The possible hashes for each optimization in corresponding with the paper:
+
+1.1: f0b9741
+1.2: 5369256
+1.3: 8898ee8
+1.4: 5ba98b7
+2.1: 070798d
+2.2-1: faa3bcd
+2.2-2: 22a3b16
+
 The testing procedure is:
 
 ```bash

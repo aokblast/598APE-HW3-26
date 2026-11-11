@@ -79,6 +79,7 @@ static void stabilize() {
   int *restrict rv = calloc(1, (N + 2) * (N + 2) * sizeof(int));
   do {
     changed = 0;
+#pragma omp parallel for reduction(| : changed)
     for (int i = 0; i < N; ++i) {
       int l = low[i], r = high[i];
       int *restrict rvp = &rv[(i + 1) * (N + 2)];
@@ -89,6 +90,7 @@ static void stabilize() {
         changed |= v; // topple it
       }
     }
+#pragma omp parallel for
     for (int i = 0; i < N; ++i) {
       int l = low[i], r = high[i];
       if (i > 0) {

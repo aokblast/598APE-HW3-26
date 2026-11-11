@@ -72,7 +72,7 @@ make
 # Run your tests.
 ```
 
-Here is the possible test test. We 
+Here is the possible test.
 
 ```bash
 ./sandpile.exe 1001

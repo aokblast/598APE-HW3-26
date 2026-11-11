@@ -76,21 +76,40 @@ static void render(char *filename) {
 
 static void stabilize() {
   int changed = 0;
+  int *restrict rv = calloc(1, (N + 2) * (N + 2) * sizeof(int));
   do {
     changed = 0;
     for (int i = 0; i < N; ++i) {
-      for (int j = low[i]; j <= high[i]; ++j) {
+      int l = low[i], r = high[i];
+      for (int j = l; j <= r; ++j) {
         int gv = grid[i][j];
         int v = gv / 4;
-        grid[i][j] = gv % 4;
+        rv[(i + 1) * (N + 2) + j + 1] = v;
         changed |= v; // topple it
-        grid[i - 1][j] += v;
-        grid[i][j - 1] += v;
-        grid[i + 1][j] += v;
-        grid[i][j + 1] += v;
+      }
+    }
+    for (int i = 0; i < N; ++i) {
+      int l = low[i], r = high[i];
+      if (i > 0) {
+        l = MIN(l, low[i - 1]);
+        r = MAX(r, high[i - 1]);
+      }
+      if (i < N - 1) {
+        l = MIN(l, low[i + 1]);
+        r = MAX(r, high[i + 1]);
+      }
+      l = MAX(l - 1, 0);
+      r = MIN(r + 1, N - 1);
+      int *restrict gr = grid[i];
+      const int *restrict up = &rv[(i) * (N + 2) + 1];
+      const int *restrict mid = &rv[(i + 1) * (N + 2) + 1];
+      const int *restrict down = &rv[(i + 2) * (N + 2) + 1];
+      for (int j = l; j <= r; ++j) {
+        gr[j] += up[j] + down[j] + mid[j - 1] + mid[j + 1] - 4 * mid[j];
       }
     }
   } while (changed);
+  free(rv);
 }
 
 static void init_bounds() {

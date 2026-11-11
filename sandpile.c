@@ -152,11 +152,13 @@ static void cg(const double *b) {
   double tol = 1e-22 * rr;
   while (rr > tol) {
     double dadk = 0;
+#pragma omp parallel for reduction(+ : dadk)
     FOR_EACH(k) {
       adk[k] = 4 * d[k] - d[k - 1] - d[k + 1] - d[k - NP] - d[k + NP];
       dadk += d[k] * adk[k];
     }
     double alpha = rr / dadk, rn = 0;
+#pragma omp parallel for reduction(+ : rn)
     FOR_EACH(k) {
       x[k] += alpha * d[k];
       r[k] -= alpha * adk[k];
@@ -164,6 +166,7 @@ static void cg(const double *b) {
     }
     double beta = rn / rr;
     rr = rn;
+#pragma omp parallel for
     FOR_EACH(k) d[k] = r[k] + beta * d[k];
   }
 #undef FOR_EACH

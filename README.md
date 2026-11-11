@@ -7,39 +7,67 @@ the course project.
 `sandpile.c` contains the implementation of finding the identity element of a 2D
 abelian sandpile.
 
-![Identity sandpile on a 1001x1001 pacman grid](identity-ref.png)
 
-*Identity sandpile on a 1001x1001 pacman grid*
+## Build with Docker
 
+Run the following command. Make sure you have Docker installed on your machine.
 
-To compile the program, run:
+It builds the required compiler toolchain into a Docker image.
 
 ```bash
-make all
+docker build -t "598ape-shengyi7-mp3" -f docker/Dockerfile .
 ```
 
-To clean existing build artifacts, run:
+## Run with Docker
 
 ```bash
+docker run -it -v ".:/workspace" -t 598ape-shengyi7-mp3 bash
+```
+
+After this, the project root will be in `/workspace`.
+
+## Checkout and Compile Programs
+
+We develop our code on the `main` branch. However, it contains all of the CI code and Makefile changes in the middle of the commit history. For better testing, we reorder the commits and create a new branch called `final`, so that all miscellaneous changes are at the bottom of the tree.
+
+First, checkout the `final` branch.
+
+```bash
+git checkout final
+```
+
+If Git is unhappy about modifying the Git repository inside the container, run the following command:
+
+```bash
+git config --global --add safe.directory /workspace
+```
+
+## Test a Specific Optimization
+
+To test the speedup of a specific optimization, we first test the commit where the optimization is introduced and then test `HEAD^`.
+
+The commit hash can be found using `git log`.
+
+The testing procedure is:
+
+```bash
+git checkout <HASH>
 make clean
+make
+# Run your tests.
+
+git checkout HEAD^
+make clean
+make
+# Run your tests.
 ```
 
-Usage (after compiling):
-
-```bash
-./sandpile.exe <N> 
-```
-
-where `N` is the grid size
-
-Consider speeding up the generation of this 1001x1001 identity sandpile (which
-takes approximately ~3m 40s on my local laptop under the default setup)
+Here is the possible test test. We 
 
 ```bash
 ./sandpile.exe 1001
 ```
 
-For an optional, ungraded challenge, see how large a sandpile you can compute
-on the course VMs and report the grid size and runtime. There is no prescribed
-upper limit on `N` for this challenge.
+Alternatively, you can run `./scripts/performance-test.sh` directly.
 
+This script runs the previous test. Each scene is run three times, and the average value is reported.
